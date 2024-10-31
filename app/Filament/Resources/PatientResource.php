@@ -38,9 +38,25 @@ class PatientResource extends Resource
                 Forms\Components\DatePicker::make('date_of_birth')
                                         ->required()
                                         ->maxDate(now()),
-                                        
+
                 Forms\Components\Select::make('owner_id')
                                         ->relationship('owner', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->createOptionForm([
+                                            Forms\Components\TextInput::make('name')
+                                                ->required()
+                                                ->maxLength(255),
+                                            Forms\Components\TextInput::make('email')
+                                                ->label('Email address')
+                                                ->email()
+                                                ->required()
+                                                ->maxLength(255),
+                                            Forms\Components\TextInput::make('phone')
+                                                ->label('Phone number')
+                                                ->tel()
+                                                ->required(),
+                                        ])
                                         ->required(),
             ]);
     }
@@ -49,10 +65,25 @@ class PatientResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('type'),
+                Tables\Columns\TextColumn::make('date_of_birth')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('owner.name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('owner.email')
+                    ->label('Owner Email'),
+                Tables\Columns\TextColumn::make('owner.phone')
+                    ->label('Owner Phone'),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('type')
+                ->options([
+                    'cat' => 'Cat',
+                    'dog' => 'Dog',
+                    'rabbit' => 'Rabbit',
+                ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -67,7 +98,7 @@ class PatientResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\TreatmentsRelationManager::class,
         ];
     }
 
